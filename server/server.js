@@ -16,7 +16,29 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('new user connected')
 
-  socket.on('disconnect', () =>{
+
+  // socket.emit('newMessage', {// Server ==> Client
+  //   from: 'sedim',
+  //   text: 'Hey this is it',
+  //   createdAt: 123
+  // });
+
+  socket.on('createMessage', (newMessage)=> {// Server <== client
+    console.log('createMessage', newMessage);
+
+    socket.broadcast.emit('newMessage', {// Server ==> Client
+      from: newMessage.from,
+      text: newMessage.text,
+      createdAt: 123
+      });
+
+
+});
+
+
+
+
+  socket.on('disconnect', function (){
     console.log('disconnected from client');
   });
 
