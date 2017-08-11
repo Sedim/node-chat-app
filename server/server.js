@@ -15,22 +15,20 @@ app.use(express.static(publicPath));
 //Register an event listener
 io.on('connection', (socket) => {
   console.log('new user connected')
-
-
-  // socket.emit('newMessage', {// Server ==> Client
-  //   from: 'sedim',
-  //   text: 'Hey this is it',
-  //   createdAt: 123
-  // });
-
+  //****>>type at the consol dev tool of browser(client) : socket.emit('createMessage', {from: 'julie', text: 'hi there'});
   socket.on('createMessage', (newMessage)=> {// Server <== client
     console.log('createMessage', newMessage);
+    // Use socket.emit  to respond only to the emmiting client :
+    //socket.emit('newMessage', {// Server ==> to the emmiting client
+    // Use socket.broadcast.emit emit to all clients except the emmiter:
+    //socket.broadcast.emit('newMessage', {// Server ==> Client
+    //Use io.emit to broadcast to ALL clients including the sending one:
+    io.emit('newMessage', {// Server ==> all Clients
+    from: newMessage.from,
+    text: newMessage.text,
+    createdAt: new Date().getTime()
+    });
 
-    socket.broadcast.emit('newMessage', {// Server ==> Client
-      from: newMessage.from,
-      text: newMessage.text,
-      createdAt: 123
-      });
 
 
 });
