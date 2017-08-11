@@ -10,6 +10,7 @@ const app = express();
 
 app.use(express.static(publicPath));
 
+var port = process.env.PORT || 3000;
 
 // app.get('/', function (req, res) {
 //   res.send('Hello World!')
@@ -17,6 +18,6 @@ app.use(express.static(publicPath));
 
 
 
-app.listen(3000, function () {
-  console.log('Chat app listening on port 3000!')
+app.listen(port, function () {
+  console.log('Chat app listening on port ', port);
 })
