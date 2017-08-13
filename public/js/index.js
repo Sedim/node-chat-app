@@ -11,13 +11,13 @@ socket.on('disconnect', function() {//'disconnect is built in'
 
 
 //you can type at the consol dev tool of browser : socket.emit('createMessage', {from: 'julie', text: 'hi there'});
-// Receive message from server:
+//**************** Receiving message from server:
 socket.on('newMessage', function(message) {// Client <==Server
   console.log('New Message:', message);
   var dd = jQuery('<dd></dd>');// set up an unordered list tag
   dd.text(`==>${message.from}: ${message.text}`); //Add the data to it
 
-  jQuery('#messagelist').append(dd);// appendit to the html
+  jQuery('#messagelist').append(dd);// appendit to the html and Display it
 });
 
 // socket.emit('createMessage', {

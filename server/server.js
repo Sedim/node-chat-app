@@ -1,14 +1,12 @@
 const path = require('path'); //built in //path join: https://nodejs.org/dist/latest-v8.x/docs/api/path.html#path_path_join_paths
-const http = require('http');
 const express = require('express');
-const socketIO = require ('socket.io');
+var app = express();
+var server = require('http').createServer(app);// Required to use socket AND express()
+var io = require('socket.io')(server);
 
 const {generateMessage} = require('./utils/message');
 const publicPath = path.join(__dirname, '../public'); //This eleminates the ../ path and makes it a clean path
 const port = process.env.PORT || 3000;
-var app = express();
-var server = http.createServer(app);// this is needed to use sockets
-var io = socketIO(server);
 
 
 app.use(express.static(publicPath));// Use the static public directory to serve html
