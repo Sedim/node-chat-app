@@ -11,38 +11,41 @@ var server = http.createServer(app);// this is needed to use sockets
 var io = socketIO(server);
 
 
-app.use(express.static(publicPath));
+app.use(express.static(publicPath));// Use the static public directory to serve html
 
 //Register an event listener
+//************ Begin socketIO Handling ***************
 io.on('connection', (socket) => {
-  console.log('new user connected') 
+  console.log('new user connected')
 
-// Use socket.emit  to emit only the emmiting client :
+// Use socket.emit  to emit only to the emmiting client :
 //socket.emit('newMessage', Server ==> to the emmiting client
-
   socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat room'));
-
 // Use socket.broadcast.emit to emit to all clients except the original emmiter:
 //socket.broadcast.emit('newMessage', Server ==> ALL Clients except emmiting client
   socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user has joined the chat room'));
-
+//Use io.emit to broadcast to ALL clients including the response to the emmiting client: Server ==> all Clients
 //****>>type at the consol dev tool of browser(client) :
 // socket.emit('createMessage', {from: 'julie', text: 'hi there'});
 // Server <== client
   socket.on('createMessage', (newMessage, callback)=> {
     console.log('createMessage', newMessage);
-    //Use io.emit to broadcast to ALL clients including the response to the emmiting client: Server ==> all Clients
     io.emit('newMessage', generateMessage(newMessage.from, newMessage.text));
-    callback('This is from the server');// acknowledge
+    callback('This is from the server');// acknowledge back to the server
+  });
+
+  socket.on('createLocationMessage', (coords) => {
+    io.emit('newMessage', generateMessage('Admin',`${coords.latitude}, ${coords.longitude}`))
   });
 
   socket.on('disconnect', function (){
     console.log('disconnected from client');
   });
 
-});
+});// end io.on
+//************End socketIO Handling ***************
 
 
-server.listen(port, function () {// we are using the http server directly  instead of express().
+server.listen(port, function () {// we are using the http node server directly  instead of express().
   console.log('Chat app listening on port ', port); //So: server.listen instead of app.listen is used for socketio
 });
