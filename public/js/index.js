@@ -9,15 +9,30 @@ socket.on('disconnect', function() {//'disconnect is built in'
   console.log('Disconnected from server');
 });
 
-
 //you can type at the consol dev tool of browser : socket.emit('createMessage', {from: 'julie', text: 'hi there'});
+
+//**************** CLIENT((newMessage) <== SERVER(newMessage)
 //**************** Receiving message from server:
-socket.on('newMessage', function(message) {// Client <==Server
+socket.on('newMessage', function(message) {
   console.log('New Message:', message);
   var dd = jQuery('<dd></dd>');// set up an unordered list tag
   dd.text(`==>${message.from}: ${message.text}`); //Add the data to it
 
-  jQuery('#messagelist').append(dd);// appendit to the html and Display it
+  jQuery('#messagelist').append(dd);// append it to the html and Display it
+});
+ 
+socket.on('newLocationMessage', function(message){
+  console.log('Location:', message);
+  var dd = jQuery('<dd></dd>');// set up an unordered list tag
+  //Set up the Anchor
+  var a = jQuery('<a target="_blank">Click here for my current location</a>');
+  //The reason we are setting the stuff below instead of just adding it through a mask
+  // is to prevent malicious injection into the URL by the user.
+  dd.text(`${message.from}: `); //construct the DOM
+  a.attr('href', message.url); // Construct the DOM
+  dd.append(a);
+  console.log('Compsed DOM:', dd)
+  jQuery('#messagelist').append(dd);
 });
 
 // socket.emit('createMessage', {
@@ -27,8 +42,8 @@ socket.on('newMessage', function(message) {// Client <==Server
 //   console.log('Got it', data);
 // });
 
+//**************** CLIENT(createMessage) ==> SERVER(createMessage)
 //**************** emiting a message to the server
-// Client ==> Server
 // Disable the standard FORM behaviour and on click:
 jQuery('#message-form').on('submit', function(e) {
   e.preventDefault();
@@ -40,7 +55,8 @@ jQuery('#message-form').on('submit', function(e) {
   });
 });
 
-//**************** Pressing and sending location info
+//**************** CLIENT(createLocationMessage) ==> SERVER(createLocationMessage)
+//**************** Pressing and sending location info to the server
 var locationButton = jQuery('#send-location');
 
 locationButton.on('click', function () {
