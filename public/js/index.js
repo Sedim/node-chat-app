@@ -15,9 +15,10 @@ socket.on('disconnect', function() { //'disconnect is built in'
 //**************** CLIENT((newMessage) <== SERVER(newMessage)
 //**************** Receiving message from server:
 socket.on('newMessage', function(message) {
-  console.log('New Message:', message);
+  //var formattedTime = moment(message.createdAt).format('h:mm a');
+  //console.log('New Message:', message);
   var dd = jQuery('<dd></dd>'); // set up an unordered list tag
-  dd.text(`==>${message.from}: ${message.text}`); //Add the data to it
+  dd.text(`${message.from} ${message.createdAt}: ${message.text}`); //Add the data to it
 
   jQuery('#messagelist').append(dd); // append it to the html and Display it
 });
@@ -29,7 +30,7 @@ socket.on('newLocationMessage', function(message) {
   var a = jQuery('<a target="_blank">Click here for my current location</a>');
   //The reason we are setting the stuff below instead of just adding it through a mask
   // is to prevent malicious injection into the URL by the user.
-  dd.text(`${message.from}: `); //construct the DOM
+  dd.text(`${message.from} ${message.createdAt}: `); //construct the DOM
   a.attr('href', message.url); // Construct the DOM
   dd.append(a);
   console.log('Compsed DOM:', dd);
