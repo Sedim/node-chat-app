@@ -1,5 +1,31 @@
 //Initial
 var socket = io(); //Insatance of io sockets
+
+//Scrolling function for Scrolling messages when you
+//at the bottom of the buffer:
+
+function scrollToBottom() {
+  // Selectors
+  var messages = jQuery('#messagelist');
+  var newMessage = messages.children('dd:last-child');
+  // Heights
+  var clientHeight = messages.prop('clientHeight');
+  var scrollTop = messages.prop('scrollTop');
+  var scrollHeight = messages.prop('scrollHeight');
+  var newMessageHeight = newMessage.innerHeight();
+  var lastMessageHeight = newMessage.prev().innerHeight();
+  console.log('Scrollheight:', scrollHeight);
+  console.log(' CH:', clientHeight, 'ST:', scrollTop, 'NMH:', newMessageHeight, 'LMH:', lastMessageHeight);
+  var total = clientHeight + scrollTop + newMessageHeight + lastMessageHeight;
+  console.log('Total ', total);
+  if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+
+    console.log('should scroll');
+    messages.scrollTop(scrollHeight);
+  }
+}
+
+
 //Standard socket calls
 socket.on('connect', function() { //'connect' is built in
   console.log('Connected to server');
@@ -11,30 +37,62 @@ socket.on('disconnect', function() { //'disconnect is built in'
 
 
 //you can type at the consol dev tool of browser : socket.emit('createMessage', {from: 'julie', text: 'hi there'});
-
+// 1C
 //**************** CLIENT((newMessage) <== SERVER(newMessage)
 //**************** Receiving message from server:
 socket.on('newMessage', function(message) {
-  //var formattedTime = moment(message.createdAt).format('h:mm a');
-  //console.log('New Message:', message);
-  var dd = jQuery('<dd></dd>'); // set up an unordered list tag
-  dd.text(`${message.from} ${message.createdAt}: ${message.text}`); //Add the data to it
 
-  jQuery('#messagelist').append(dd); // append it to the html and Display it
+  // JQuery refers to the content of the content of the <script>
+  // tag and .html() gives the html code to template
+  var template = jQuery('#messagelist-template').html();
+  //console.log('template', template);
+  // Insert the data into the template:
+  var html = Mustache.render(template, {
+    text: message.text,
+    from: message.from,
+    createdAt: message.createdAt
+  });
+  //console.log('html', html);
+  // actuall add it to the messageList
+  jQuery('#messagelist').append(html);
+  scrollToBottom(); //Scrolls down only wehn you are at the bottom
+  // //var formattedTime = moment(message.createdAt).format('h:mm a');
+  // //console.log('New Message:', message);
+  // var dd = jQuery('<dd></dd>'); // set up an unordered list tag
+  // dd.text(`${message.from} ${message.createdAt}: ${message.text}`); //Add the data to it
+  //
+  // jQuery('#messagelist').append(dd); // append it to the html and Display it
 });
 
+// 2C
 socket.on('newLocationMessage', function(message) {
-  console.log('Location:', message);
-  var dd = jQuery('<dd></dd>'); // set up an unordered list tag
-  //Set up the Anchor
-  var a = jQuery('<a target="_blank">Click here for my current location</a>');
-  //The reason we are setting the stuff below instead of just adding it through a mask
-  // is to prevent malicious injection into the URL by the user.
-  dd.text(`${message.from} ${message.createdAt}: `); //construct the DOM
-  a.attr('href', message.url); // Construct the DOM
-  dd.append(a);
-  console.log('Compsed DOM:', dd);
-  jQuery('#messagelist').append(dd);
+  //read the template from index.html
+  console.log('Message from server', message);
+  var template = jQuery('#location-messagelist-template').html();
+  // Insert the data into the template:
+  var html = Mustache.render(template, {
+    url: message.url,
+    from: message.from,
+    createdAt: message.createdAt
+  });
+  //console.log('html', html);
+  // actuall add it to the messageList
+  console.log(html);
+  jQuery('#messagelist').append(html);
+  scrollToBottom(); //Scrolls down only wehn you are at the bottom
+
+
+  // console.log('Location:', message);
+  // var dd = jQuery('<dd></dd>'); // set up an unordered list tag
+  // //Set up the Anchor
+  // var a = jQuery('<a target="_blank">Click here for my current location</a>');
+  // //The reason we are setting the stuff below instead of just adding it through a mask
+  // // is to prevent malicious injection into the URL by the user.
+  // dd.text(`${message.from} ${message.createdAt}: `); //construct the DOM
+  // a.attr('href', message.url); // Construct the DOM
+  // dd.append(a);
+  // console.log('Compsed DOM:', dd);
+  // jQuery('#messagelist').append(dd);
 });
 
 // socket.emit('createMessage', {
@@ -44,16 +102,15 @@ socket.on('newLocationMessage', function(message) {
 //   console.log('Got it', data);
 // });
 
+
+
+// 1A
 //**************** CLIENT(createMessage) ==> SERVER(createMessage) //
 //**************** emiting a message to the server
 // Disable the standard FORM behaviour and on click:
 
 jQuery('#message-form').on('submit', function(e) {
   e.preventDefault();
-  /**
-   * [messageTextbox: Created to quickly change the messaage area]
-   * @type {[Object]}
-   */
   var messageTextbox = jQuery('[name=message]');
 
   //on click:
@@ -65,7 +122,7 @@ jQuery('#message-form').on('submit', function(e) {
   });
 });
 
-
+// 2A
 //**************** CLIENT(createLocationMessage) ==> SERVER(createLocationMessage)
 //**************** Pressing and sending location info to the server
 var locationButton = jQuery('#send-location');

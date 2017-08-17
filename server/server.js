@@ -27,6 +27,7 @@
    //socket.broadcast.emit('newMessage', Server ==> ALL Clients except emmiting client
    socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user has joined the chat room'));
 
+   // 1B
    // **************** on CLIENT#x 'createMessage', SERVER ('newMessage') ==> All Clients ('newMessage')
    //Use io.emit to broadcast to ALL clients including the response to the emmiting client: Server ==> all Clients
    //****>>type at the consol dev tool of browser(client) :
@@ -37,6 +38,7 @@
      callback('This is from the server'); // acknowledge back to the server
    });
 
+   // 2B
    // **************** on CLIENT#x 'createLocationMessage', SERVER ('newLocationMessage') ==> All Clients ('newLocationMessage')
    socket.on('createLocationMessage', (coords) => {
      io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
