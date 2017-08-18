@@ -14,10 +14,10 @@ function scrollToBottom() {
   var scrollHeight = messages.prop('scrollHeight');
   var newMessageHeight = newMessage.innerHeight();
   var lastMessageHeight = newMessage.prev().innerHeight();
-  console.log('Scrollheight:', scrollHeight);
-  console.log(' CH:', clientHeight, 'ST:', scrollTop, 'NMH:', newMessageHeight, 'LMH:', lastMessageHeight);
+  //console.log('Scrollheight:', scrollHeight);
+  //console.log(' CH:', clientHeight, 'ST:', scrollTop, 'NMH:', newMessageHeight, 'LMH:', lastMessageHeight);
   var total = clientHeight + scrollTop + newMessageHeight + lastMessageHeight;
-  console.log('Total ', total);
+  //console.log('Total ', total);
   if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
 
     console.log('should scroll');
@@ -29,6 +29,19 @@ function scrollToBottom() {
 //Standard socket calls
 socket.on('connect', function() { //'connect' is built in
   console.log('Connected to server');
+  // Extract the 'FORM' variables from the url into JSON format
+  var loginFormParams = jQuery.deparam(window.location.search);
+  // 3A
+  // Client ==> Server
+  //Initial Join chat room
+  socket.emit('join', loginFormParams, function(err) { // The function is the ACK
+    if (err) {
+      alert(err);
+      window.location.href = '/';
+    } else {
+      console.log('No error');
+    }
+  });
 });
 
 socket.on('disconnect', function() { //'disconnect is built in'
