@@ -1,38 +1,15 @@
 //Initial
-var socket = io(); //Insatance of io sockets
-
-//Scrolling function for Scrolling messages when you
-//at the bottom of the buffer:
-
-function scrollToBottom() {
-	// Selectors
-	var messages = jQuery('#messagelist');
-	var newMessage = messages.children('dd:last-child');
-	// Heights
-	var clientHeight = messages.prop('clientHeight');
-	var scrollTop = messages.prop('scrollTop');
-	var scrollHeight = messages.prop('scrollHeight');
-	var newMessageHeight = newMessage.innerHeight();
-	var lastMessageHeight = newMessage.prev().innerHeight();
-	//console.log('Scrollheight:', scrollHeight);
-	//console.log(' CH:', clientHeight, 'ST:', scrollTop, 'NMH:', newMessageHeight, 'LMH:', lastMessageHeight);
-	var total = clientHeight + scrollTop + newMessageHeight + lastMessageHeight;
-	//console.log('Total ', total);
-	if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
-
-		console.log('should scroll');
-		messages.scrollTop(scrollHeight);
-	}
-}
+var socket = io(); //Instance of io sockets
 
 
-//Standard socket calls
+
+//********** ON CLIENT CONNECT
 socket.on('connect', function() { //'connect' is built in
 	console.log('Connected to server');
 	// Extract the 'FORM' variables from the url into JSON format
 	var loginFormParams = jQuery.deparam(window.location.search);
-	// 3A
-	// Client ==> Server
+
+	//3A Client ==> Server
 	//Initial Join chat room
 	socket.emit('join', loginFormParams, function(err) { // The function is the ACK
 		if (err) {
@@ -41,18 +18,37 @@ socket.on('connect', function() { //'connect' is built in
 		} else {
 			console.log('No error');
 		}
+		jQuery('#roomname').html('<h3>\"' + loginFormParams.room + '\"</h3>'); // Add the name of the room
 	});
 });
 
+//*********** ON CLIENT DISCONNECT
 socket.on('disconnect', function() { //'disconnect is built in'
 	console.log('Disconnected from server');
 });
 
 
+// CLIENT <== SERVER update users in room
+// Here we update the display of users in the room
+socket.on('updateUserList', function(users) {
+	console.log('users list', users);
+
+	var ol = jQuery('<ol></ol>'); // construct the html Ordered list
+
+	users.forEach(function(user) { // Iterate through the users list supplied
+		ol.append(jQuery('<li></li>').text(user)); // add each user to a  the <ol> <li>user1</li> <li>user1</li> </ol> tag to make the ordrered list
+	});
+
+	// Now we have to display to the DOM the new ordered html list we just created
+	jQuery('#users').html(ol);
+
+
+
+});
+
+
+// 1C CLIENT((newMessage) <== SERVER(newMessage)
 //you can type at the consol dev tool of browser : socket.emit('createMessage', {from: 'julie', text: 'hi there'});
-// 1C
-//**************** CLIENT((newMessage) <== SERVER(newMessage)
-//**************** Receiving message from server:
 socket.on('newMessage', function(message) {
 
 	// JQuery refers to the content of the content of the <script>
@@ -77,7 +73,7 @@ socket.on('newMessage', function(message) {
 	// jQuery('#messagelist').append(dd); // append it to the html and Display it
 });
 
-// 2C
+// 2C CLIENT(newLocationMessage) <== SERVER(newLocationMessage)
 socket.on('newLocationMessage', function(message) {
 	//read the template from index.html
 	console.log('Message from server', message);
@@ -93,35 +89,14 @@ socket.on('newLocationMessage', function(message) {
 	console.log(html);
 	jQuery('#messagelist').append(html);
 	scrollToBottom(); //Scrolls down only wehn you are at the bottom
-
-
-	// console.log('Location:', message);
-	// var dd = jQuery('<dd></dd>'); // set up an unordered list tag
-	// //Set up the Anchor
-	// var a = jQuery('<a target="_blank">Click here for my current location</a>');
-	// //The reason we are setting the stuff below instead of just adding it through a mask
-	// // is to prevent malicious injection into the URL by the user.
-	// dd.text(`${message.from} ${message.createdAt}: `); //construct the DOM
-	// a.attr('href', message.url); // Construct the DOM
-	// dd.append(a);
-	// console.log('Compsed DOM:', dd);
-	// jQuery('#messagelist').append(dd);
 });
 
-// socket.emit('createMessage', {
-//   from: 'frank',
-//   text: 'Hi'
-// }, function(data) {
-//   console.log('Got it', data);
-// });
 
 
 
-// 1A
-//**************** CLIENT(createMessage) ==> SERVER(createMessage) //
+// 1A CLIENT(createMessage) ==> SERVER(createmessage)
 //**************** emiting a message to the server
 // Disable the standard FORM behaviour and on click:
-
 jQuery('#message-form').on('submit', function(e) {
 	e.preventDefault();
 	var messageTextbox = jQuery('[name=message]');
@@ -135,8 +110,7 @@ jQuery('#message-form').on('submit', function(e) {
 	});
 });
 
-// 2A
-//**************** CLIENT(createLocationMessage) ==> SERVER(createLocationMessage)
+// 2A CLIENT(createLocationMessage) ==> SERVER(createLocationMessage)
 //**************** Pressing and sending location info to the server
 var locationButton = jQuery('#send-location');
 locationButton.on('click', function() {
@@ -144,7 +118,6 @@ locationButton.on('click', function() {
 	if (!navigator.geolocation) { // if there is no built in navigator in your broswer
 		return alert('Geolocation not supported by you browser.');
 	}
-
 	//the disabled attribute is set to dissabled and disables the button
 	locationButton.attr('disabled', 'disabled').text('Sending location...');
 
@@ -160,4 +133,40 @@ locationButton.on('click', function() {
 		alert('Unable to fetch location.');
 	});
 });
-//*****************
+
+// UTILITIES
+//*****************//Scrolling function for Scrolling messages when you
+//at the bottom of the buffer:
+function scrollToBottom() {
+	// Selectors
+	var messages = jQuery('#messagelist');
+	var newMessage = messages.children('dd:last-child');
+	// Heights
+	var clientHeight = messages.prop('clientHeight');
+	var scrollTop = messages.prop('scrollTop');
+	var scrollHeight = messages.prop('scrollHeight');
+	var newMessageHeight = newMessage.innerHeight();
+	var lastMessageHeight = newMessage.prev().innerHeight();
+	//console.log('Scrollheight:', scrollHeight);
+	//console.log(' CH:', clientHeight, 'ST:', scrollTop, 'NMH:', newMessageHeight, 'LMH:', lastMessageHeight);
+	var total = clientHeight + scrollTop + newMessageHeight + lastMessageHeight;
+	//console.log('Total ', total);
+	if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+
+		console.log('should scroll');
+		messages.scrollTop(scrollHeight);
+	}
+}
+
+//NOTES:
+// console.log('Location:', message);
+// var dd = jQuery('<dd></dd>'); // set up an unordered list tag
+// //Set up the Anchor
+// var a = jQuery('<a target="_blank">Click here for my current location</a>');
+// //The reason we are setting the stuff below instead of just adding it through a mask
+// // is to prevent malicious injection into the URL by the user.
+// dd.text(`${message.from} ${message.createdAt}: `); //construct the DOM
+// a.attr('href', message.url); // Construct the DOM
+// dd.append(a);
+// console.log('Compsed DOM:', dd);
+// jQuery('#messagelist').append(dd);
