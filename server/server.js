@@ -49,14 +49,25 @@ io.on('connection', (socket) => {
 	// socket.emit('createMessage', {from: 'julie', text: 'hi there'});
 	socket.on('createMessage', (newMessage, callback) => {
 		console.log('createMessage', newMessage);
-		io.emit('newMessage', generateMessage(newMessage.from, newMessage.text));
+		var user = users.getUser(socket.id); //get the user name (for display purposes) that sent the message from the client
+
+		if (user && isRealString(newMessage.text)) { //isRealString eleminates CR blank submittions such as spaces etc
+			//io.emit('newMessage', generateMessage(user.name, newMessage.text));
+			io.to(user.room).emit('newMessage', generateMessage(user.name, newMessage.text)); // send message to user room and also send his name
+		}
 		callback('This is from the server'); // acknowledge back to the server
 	});
 
 	// 2B
 	// **************** on CLIENT#x 'createLocationMessage', SERVER ('newLocationMessage') ==> All Clients ('newLocationMessage')
 	socket.on('createLocationMessage', (coords) => {
-		io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
+		var user = users.getUser(socket.id); //get the user name (for display purposes) that sent the message from the client
+		if (user) {
+			//io.emit('newMessage', generateMessage(user.name, newMessage.text));
+			//io.to(user.room).emit('newMessage', generateMessage(user.name, newMessage.text)); // send message to user room and also send his name
+			io.to(user.room).emit('newLocationMessage', generateLocationMessage(user.name, coords.latitude, coords.longitude));
+		}
+
 	});
 
 	// **************** When the  Client#x disconnects (or hit refresh page or close the browser page)
@@ -64,7 +75,7 @@ io.on('connection', (socket) => {
 		var user = users.removeUser(socket.id); // We have to remove the user from the userlist
 
 		if (user) {
-			io.to(user.room).emit('updateUserList', users.getUserList(user.room)); // // Also we have have to update the user display list on the client with the new userlist in the room the user was deleted 
+			io.to(user.room).emit('updateUserList', users.getUserList(user.room)); // // Also we have have to update the user display list on the client with the new userlist in the room the user was deleted
 			io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left`)); // Finally Inform all clients in that room that the user has left
 		}
 		//console.log('disconnected from client');

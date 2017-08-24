@@ -98,12 +98,12 @@ socket.on('newLocationMessage', function(message) {
 //**************** emiting a message to the server
 // Disable the standard FORM behaviour and on click:
 jQuery('#message-form').on('submit', function(e) {
-	e.preventDefault();
-	var messageTextbox = jQuery('[name=message]');
+	e.preventDefault(); //
+	var messageTextbox = jQuery('[name=message]'); // load the actual field data
 
 	//on click:
 	socket.emit('createMessage', {
-		from: 'User',
+		//from: 'User',
 		text: messageTextbox.val() // Send the actual text
 	}, function() { // Acknowledge receipt from the server function
 		messageTextbox.val(''); // Clear the message form field after submision
