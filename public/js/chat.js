@@ -1,14 +1,13 @@
 //Initial
 var socket = io(); //Instance of io sockets
-
-
-
 //********** ON CLIENT CONNECT
 socket.on('connect', function() { //'connect' is built in
 	console.log('Connected to server');
-	// Extract the 'FORM' variables from the url into JSON format
+	// Extract the 'FORM' variables from the url into JSON format:
 	var loginFormParams = jQuery.deparam(window.location.search);
-
+	loginFormParams.room = loginFormParams.room.toUpperCase(); // Standardize to Uppercase rooms only
+	//console.log(loginFormParams.room);
+	//ADD THE UPPERCASE STUFF HERE FOR THE ROOM
 	//3A Client ==> Server
 	//Initial Join chat room
 	socket.emit('join', loginFormParams, function(err) { // The function is the ACK
@@ -27,7 +26,7 @@ socket.on('disconnect', function() { //'disconnect is built in'
 	console.log('Disconnected from server');
 });
 
-
+//ON UPDATE USER LIST IN ROOM
 // CLIENT <== SERVER update users in room
 // Here we update the display of users in the room
 socket.on('updateUserList', function(users) {
@@ -46,7 +45,7 @@ socket.on('updateUserList', function(users) {
 
 });
 
-
+//ON NEW MESSAGE FROM OTHER CLIENTS
 // 1C CLIENT((newMessage) <== SERVER(newMessage)
 //you can type at the consol dev tool of browser : socket.emit('createMessage', {from: 'julie', text: 'hi there'});
 socket.on('newMessage', function(message) {
@@ -73,6 +72,7 @@ socket.on('newMessage', function(message) {
 	// jQuery('#messagelist').append(dd); // append it to the html and Display it
 });
 
+// ON NEW LOCATION FROM OTHER CLIENTS
 // 2C CLIENT(newLocationMessage) <== SERVER(newLocationMessage)
 socket.on('newLocationMessage', function(message) {
 	//read the template from index.html
@@ -93,7 +93,7 @@ socket.on('newLocationMessage', function(message) {
 
 
 
-
+// ON SUBMIT A NEW MESSAGE
 // 1A CLIENT(createMessage) ==> SERVER(createmessage)
 //**************** emiting a message to the server
 // Disable the standard FORM behaviour and on click:
@@ -110,6 +110,7 @@ jQuery('#message-form').on('submit', function(e) {
 	});
 });
 
+// ON SUBMIT CREATE NEW LOCATION
 // 2A CLIENT(createLocationMessage) ==> SERVER(createLocationMessage)
 //**************** Pressing and sending location info to the server
 var locationButton = jQuery('#send-location');
